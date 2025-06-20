@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -37,6 +39,9 @@ android {
     buildFeatures {
         compose = true
     }
+    composeOptions{
+        kotlinCompilerExtensionVersion = "1.5.13"
+    }
 }
 
 dependencies {
@@ -56,5 +61,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.8.1")
+
+
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.8.3")
+    implementation("androidx.navigation:navigation-compose:2.9.0")
 }

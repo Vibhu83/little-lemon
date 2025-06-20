@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Little Lemon</string>
+    
+    
+    <string name="preference_file_key">USER_PREFERENCES</string>
+    
 </resources>
