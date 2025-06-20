@@ -22,4 +22,5 @@ object LittleLemonColors{
     val white = Color(0xFFFFFFFF)
     val black = Color(0xFF000000)
     val transparent =  Color(0x00000000)
+    val error = Color(0xFFB00020)
 }
