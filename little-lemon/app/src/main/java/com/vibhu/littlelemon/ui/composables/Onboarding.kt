@@ -68,20 +68,19 @@ fun Onboarding(navController: NavHostController){
     var emailHasIncorrectValue by remember {
         mutableStateOf(false)
     }
-    val preferences = LocalContext.current.getSharedPreferences(
+    val context = LocalContext.current
+    val preferences = context.getSharedPreferences(
         ApplicationKeys.preferences,
         Context.MODE_PRIVATE
     )
     var formHasIncorrectInput by remember {
         mutableStateOf(false)
     }
-
-    val context = LocalContext.current
-
-
+    
     Box(
         modifier = Modifier.fillMaxWidth()
-    ){
+    )
+    {
         Column(
             Modifier.fillMaxSize(),
         ) {

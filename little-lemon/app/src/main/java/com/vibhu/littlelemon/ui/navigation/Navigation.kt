@@ -35,7 +35,7 @@ fun Navigation(modifier: Modifier, navController: NavHostController){
             Home()
         }
         composable(route = Destinations.Profile.route) {
-            Profile()
+            Profile(navController)
         }
         composable(route = Destinations.Onboarding.route) {
             Onboarding(navController)
