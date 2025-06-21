@@ -76,7 +76,7 @@ fun Onboarding(navController: NavHostController){
     var formHasIncorrectInput by remember {
         mutableStateOf(false)
     }
-    
+
     Box(
         modifier = Modifier.fillMaxWidth()
     )
@@ -202,10 +202,12 @@ fun Onboarding(navController: NavHostController){
                     }
                     else{
                         formHasIncorrectInput = false
-                        val userData = "[firstName: $firstName, lastName: $lastName, email: $email]"
                         preferences.edit{
+                            val userKeys = LoginKeys.UserKeys
                             putBoolean(LoginKeys.userIsLoggedIn, true)
-                            putString(LoginKeys.userData, userData)
+                            putString(userKeys.firstName, firstName)
+                            putString(userKeys.lastName, lastName)
+                            putString(userKeys.email, email)
                         }
                         Toast.makeText(context,"Registration successful!", Toast.LENGTH_LONG).show()
                         navController.navigate(Destinations.Home.route)

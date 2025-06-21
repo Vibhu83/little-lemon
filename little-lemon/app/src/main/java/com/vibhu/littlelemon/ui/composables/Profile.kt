@@ -47,6 +47,10 @@ fun Profile(navController: NavHostController) {
     val context = LocalContext.current
     val preferences = context.getSharedPreferences(ApplicationKeys.preferences, Context.MODE_PRIVATE)
 
+    val firstName = preferences.getString(LoginKeys.UserKeys.firstName, "")?: ""
+    val lastName = preferences.getString(LoginKeys.UserKeys.lastName, "")?: ""
+    val email = preferences.getString(LoginKeys.UserKeys.email, "")?: ""
+
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -94,19 +98,19 @@ fun Profile(navController: NavHostController) {
                 TextBox(
                     modifier = Modifier,
                     "First Name",
-                    "Tilly",
+                    firstName,
                 )
                 Spacer(Modifier.fillMaxWidth().height(40.dp))
                 TextBox(
                     modifier = Modifier,
                     "Last Name",
-                    "Doe",
+                    lastName,
                 )
                 Spacer(Modifier.fillMaxWidth().height(40.dp))
                 TextBox(
                     modifier = Modifier,
                     "Email",
-                    "tillydoe@example.com",
+                    email,
                 )
                 Spacer(Modifier.fillMaxWidth().height(40.dp))
             }
@@ -114,11 +118,13 @@ fun Profile(navController: NavHostController) {
         Button(
             onClick = {
                 preferences.edit {
-                    putString(LoginKeys.userData, "")
+                    putString(LoginKeys.UserKeys.firstName, "")
+                    putString(LoginKeys.UserKeys.lastName, "")
+                    putString(LoginKeys.UserKeys.email, "")
                     putBoolean(LoginKeys.userIsLoggedIn, false)
                 }
                 Toast.makeText(context, "Successfully logged out!", Toast.LENGTH_LONG).show()
-                navController.navigate(Destinations.Onboarding)
+                navController.navigate(Destinations.Onboarding.route)
 
             },
             modifier = Modifier
