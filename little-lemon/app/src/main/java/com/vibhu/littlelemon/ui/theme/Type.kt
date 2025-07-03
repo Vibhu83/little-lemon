@@ -2,10 +2,9 @@ package com.vibhu.littlelemon.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.vibhu.littlelemon.R
 
@@ -63,29 +62,32 @@ val Typography = Typography(
 
 object LittleLemonTypography{
 
-    private val provider = GoogleFont.Provider(
-        providerAuthority = "com.google.android.gms.fonts",
-        providerPackage = "com.google.android.gms",
-        certificates = R.array.com_google_android_gms_fonts_certs
-    )
+//    private val provider = GoogleFont.Provider(
+//        providerAuthority = "com.google.android.gms.fonts",
+//        providerPackage = "com.google.android.gms",
+//        certificates = R.array.com_google_android_gms_fonts_certs
+//    )
 
     val fontFamilyKarla = FontFamily(
-        Font(
-            googleFont = GoogleFont("Karla"),
-            fontProvider = provider,
-        )
+        Font(R.font.karla_font_extralight, FontWeight.ExtraLight),
+        Font(R.font.karla_font_light, FontWeight.Light),
+        Font(R.font.karla_font_regular, FontWeight.Normal),
+        Font(R.font.karla_font_medium, FontWeight.Medium),
+        Font(R.font.karla_font_semibold, FontWeight.SemiBold),
+        Font(R.font.karla_font_bold, FontWeight.Bold),
+        Font(R.font.karla_font_extrabold, FontWeight.ExtraBold),
     )
     val fontFamilyMarkazi = FontFamily(
-        Font(
-            googleFont = GoogleFont("Markazi"),
-            fontProvider = provider,
-        )
+        Font(R.font.markazi_font_regular, FontWeight.Normal),
+        Font(R.font.markazi_font_medium, FontWeight.Medium),
+        Font(R.font.markazi_font_semibold, FontWeight.SemiBold),
+        Font(R.font.markazi_font_bold, FontWeight.Bold),
     )
 
     val displayTitle = TextStyle(
         fontFamily = fontFamilyMarkazi,
         fontWeight = FontWeight.Medium,
-        fontSize = 64.sp
+        fontSize = 60.sp
     )
     val subTitle = TextStyle(
         fontFamily = fontFamilyMarkazi,

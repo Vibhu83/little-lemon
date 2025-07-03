@@ -1,9 +1,11 @@
-import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("kotlin-kapt")
 }
 
 android {
@@ -39,9 +41,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions{
-        kotlinCompilerExtensionVersion = "1.5.13"
-    }
 }
 
 dependencies {
@@ -65,4 +64,20 @@ dependencies {
 
     implementation("androidx.compose.ui:ui-text-google-fonts:1.8.3")
     implementation("androidx.navigation:navigation-compose:2.9.0")
+
+    implementation("io.ktor:ktor-client-android:2.1.3")
+    implementation("io.ktor:ktor-client-content-negotiation:2.1.3") // Or OkHttp/Android
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.1.3")
+
+
+    implementation("androidx.room:room-runtime:2.4.3")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.8.3")
+    kapt("androidx.room:room-compiler:2.4.3")
+
+    implementation("androidx.compose.foundation:foundation:1.8.3") // or newer
+
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+
+
 }
