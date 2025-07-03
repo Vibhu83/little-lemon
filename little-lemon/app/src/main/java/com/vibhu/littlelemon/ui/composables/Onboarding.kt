@@ -1,5 +1,6 @@
 package com.vibhu.littlelemon.ui.composables
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -8,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -41,14 +43,13 @@ import com.vibhu.littlelemon.ui.keys.ApplicationKeys
 import com.vibhu.littlelemon.ui.theme.LittleLemonColors
 import com.vibhu.littlelemon.ui.theme.LittleLemonTypography
 import androidx.core.content.edit
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.vibhu.littlelemon.ui.keys.LoginKeys
 import com.vibhu.littlelemon.ui.navigation.Destinations
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun Onboarding(navController: NavHostController){
-    val paddingFormHorizontal = 20.dp
+fun Onboarding(navController: NavHostController? =null){
 
     var firstName by remember {
         mutableStateOf("")
@@ -73,67 +74,59 @@ fun Onboarding(navController: NavHostController){
         ApplicationKeys.preferences,
         Context.MODE_PRIVATE
     )
+    val isUserLoggedIn = preferences.getBoolean(LoginKeys.userIsLoggedIn, false)
+    if (isUserLoggedIn){
+        navController?.let {
+            it.navigate(Destinations.Home.route)
+        }
+    }
     var formHasIncorrectInput by remember {
         mutableStateOf(false)
     }
 
-    Box(
-        modifier = Modifier.fillMaxWidth()
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
     )
     {
+        val height = maxHeight
+        val width = maxWidth
+
+        val horizontalPadding = width*.035f
+        val screenWidthAfterPadding = width-(horizontalPadding*2)
+
+        val topBarHeight = height*.1f
+        //.9
+        val pageTitleHeight = height*.2f
+        //.7
+        val formTitleHeight = height*.15f
+        //.55
+        val entryFieldHeight = height*.1f
+        //.25
+        val entrySpacerHeight = height*.05f
+        //.1
+        val registerButtonHeight = height*.1f
+        
         Column(
             Modifier.fillMaxSize(),
         ) {
-            Box(
+            TopBar(height = topBarHeight)
+            PageTitle(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(.125f),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.logo),
-                    contentScale = ContentScale.FillWidth,
-                    contentDescription = "",
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth(.5f)
-                        .fillMaxHeight()
-
-                )
-            }
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(.175f)
+                    .height(height*.2f)
                     .background(LittleLemonColors.primary1),
-                contentAlignment = Alignment.Center
-            ){
-                Text(
-                    "Let's get to know you",
-                    color = LittleLemonColors.secondary3,
-                    style = LittleLemonTypography.cardTitle,
-
-                    fontSize = 26.sp
-                )
-            }
-            Box(
+                height = pageTitleHeight,
+            )
+            FormTitle(
                 Modifier
-                    .fillMaxHeight(.2f)
-                    .padding(horizontal = paddingFormHorizontal),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "Personal Information",
-                    fontFamily = LittleLemonTypography.fontFamilyKarla,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 16.sp,
-                    letterSpacing = 1.sp,
-                    color = LittleLemonColors.secondary4
-                )
-            }
+                    .height(formTitleHeight)
+                    .padding(horizontal = horizontalPadding),
+                height = formTitleHeight,
+                width = screenWidthAfterPadding
+            )
             Column(
                 modifier = Modifier
-                    .padding(horizontal = paddingFormHorizontal),
+                    .padding(horizontal = horizontalPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -142,55 +135,64 @@ fun Onboarding(navController: NavHostController){
                     "First Name",
                     "Tilly",
                     firstName,
-                    firstNameHasIncorrectValue
+                    firstNameHasIncorrectValue,
+                    height = entryFieldHeight,
+                    width = screenWidthAfterPadding
                 ) {
                     firstNameHasIncorrectValue = it.isBlank()
                     firstName = it
                 }
-                Spacer(Modifier.fillMaxWidth().height(40.dp))
+                Spacer(Modifier.fillMaxWidth().height(entrySpacerHeight))
                 EntryField(
                     modifier = Modifier,
                     "Last Name",
                     "Doe",
                     lastName,
-                    lastNameHasIncorrectValue
+                    lastNameHasIncorrectValue,
+                    height = entryFieldHeight,
+                    width = screenWidthAfterPadding
                 ) {
                     lastNameHasIncorrectValue = it.isBlank()
                     lastName = it
                 }
-                Spacer(Modifier.fillMaxWidth().height(40.dp))
+                Spacer(Modifier.fillMaxWidth().height(entrySpacerHeight))
                 EntryField(
                     modifier = Modifier,
                     "Email",
                     "tillydoe@example.com",
                     email,
-                    emailHasIncorrectValue
+                    emailHasIncorrectValue,
+                    height = entryFieldHeight,
+                    width = screenWidthAfterPadding
                 ) {
                     emailHasIncorrectValue = it.isBlank()
                     email = it
                 }
-                Spacer(Modifier.fillMaxWidth().height(40.dp))
+                Spacer(Modifier.fillMaxWidth().height(entrySpacerHeight))
             }
         }
 
         Column(
             modifier = Modifier
+                .height(registerButtonHeight)
                 .fillMaxWidth()
-                .padding(horizontal = paddingFormHorizontal)
-                                .align(Alignment.BottomCenter)
-                .offset(y = 0.dp.minus(40.dp)),
+                .padding(horizontal = horizontalPadding)
+                .align(Alignment.BottomCenter)
+                .offset(y = 0.dp.minus(registerButtonHeight/3)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val errorTextHeight = registerButtonHeight*.2f
+            val buttonHeight = registerButtonHeight*.6f
             Text(
                 if (formHasIncorrectInput)
                         "Registration unsuccessful. Please enter all data."
                     else
-                        " "
+                        ""
                 ,
                 style = LittleLemonTypography.highlightText,
-                fontSize = 14.sp,
+                fontSize = (errorTextHeight*.825f).value.sp,
                 color = LittleLemonColors.error,
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.85f).height(errorTextHeight)
             )
             Button(
                 onClick = {
@@ -210,11 +212,14 @@ fun Onboarding(navController: NavHostController){
                             putString(userKeys.email, email)
                         }
                         Toast.makeText(context,"Registration successful!", Toast.LENGTH_LONG).show()
-                        navController.navigate(Destinations.Home.route)
+                        navController?.let {
+                            it.navigate(Destinations.Home.route)
+                        }
                     }
                 },
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(buttonHeight),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = LittleLemonColors.primary2,
@@ -225,7 +230,8 @@ fun Onboarding(navController: NavHostController){
         ) {
                 Text(
                     "Register",
-                    fontFamily = LittleLemonTypography.fontFamilyKarla,
+                    fontSize = (buttonHeight*.38f).value.sp,
+                    style = LittleLemonTypography.highlightText,
                     color = LittleLemonColors.secondary4
                 )
             }
@@ -235,12 +241,79 @@ fun Onboarding(navController: NavHostController){
 
 
 @Composable
+private fun TopBar(
+    modifier: Modifier = Modifier,
+    height: Dp,
+){
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height),
+    ) {
+        Image(
+            painter = painterResource(R.drawable.logo),
+            contentScale = ContentScale.FillWidth,
+            contentDescription = "",
+            alignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth(.5f)
+                .fillMaxHeight()
+                .align(Alignment.Center)
+
+        )
+    }
+}
+
+@Composable
+private fun PageTitle(
+    modifier: Modifier = Modifier,
+    height: Dp,
+){
+    Box(
+        modifier,
+        contentAlignment = Alignment.Center
+    ){
+        Text(
+            "Let's get to know you",
+            color = LittleLemonColors.secondary3,
+            style = LittleLemonTypography.cardTitle,
+            fontSize = (height*.175f).value.sp,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun FormTitle(
+    modifier: Modifier,
+    height: Dp,
+    width: Dp
+){
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "Personal Information",
+            style = LittleLemonTypography.cardTitle,
+            fontSize = (height*.165f).value.sp,
+            color = LittleLemonColors.secondary4
+        )
+    }
+
+}
+
+
+
+@Composable
 private fun EntryField(
     modifier: Modifier = Modifier,
     label: String,
     hintText: String,
     value: String,
     hasIncorrectInput: Boolean = false,
+    height: Dp,
+    width: Dp,
     onValueChange: (String)-> Unit,
     ) {
     var placeHolderShouldBeVisible by remember {
@@ -252,10 +325,11 @@ private fun EntryField(
         Text(
             label,
             style = LittleLemonTypography.highlightText,
-            fontSize = 12.sp,
-            letterSpacing = 1.sp,
-            color = if(hasIncorrectInput) LittleLemonColors.error else LittleLemonColors.primary1.copy(alpha = .85f),
-            modifier = Modifier.padding(bottom = 5.dp, start = 1.dp)
+            fontWeight = FontWeight.SemiBold,
+            fontSize = (height*.14f).value.sp,
+            letterSpacing = 0.75.sp,
+            color = if(hasIncorrectInput) LittleLemonColors.error else LittleLemonColors.primary1.copy(alpha = .75f),
+            modifier = Modifier.padding(bottom = height*.05f, start = height*.015f)
         )
         BasicTextField(
             value = value,
@@ -266,27 +340,30 @@ private fun EntryField(
                 onValueChange(it)
             },
             singleLine = true,
-            textStyle = LittleLemonTypography.paragraphText.copy(color = LittleLemonColors.primary1),
+            textStyle = LittleLemonTypography.paragraphText.copy(
+                color = LittleLemonColors.primary1,
+                fontSize = (height*.2f).value.sp,
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .background(LittleLemonColors.transparent , RoundedCornerShape(8.dp))
                 .border(
                     1.dp,
-
                     if(hasIncorrectInput)
                                 LittleLemonColors.error
                             else
                                 LittleLemonColors.primary1.copy(alpha = .5f),
 
                     RoundedCornerShape(8.dp))
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = width*.04f, vertical = height*.2f),
             decorationBox = { innerTextField ->
                 if (placeHolderShouldBeVisible)
                 {
                     Text(
                         hintText,
+                        fontSize = (height*.2f).value.sp,
                         style = LittleLemonTypography.paragraphText,
-                        color = LittleLemonColors.primary1.copy(alpha = .75f)
+                        color = LittleLemonColors.primary1.copy(alpha = .9f)
                     )
                     innerTextField()
                 }
@@ -296,5 +373,11 @@ private fun EntryField(
             }
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun OnboardingPreview(){
+    Onboarding()
 }
 
