@@ -34,6 +34,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.vibhu.littlelemon.R
+import com.vibhu.littlelemon.ui.entities.MenuItemRoom
 import com.vibhu.littlelemon.ui.navigation.Destinations
 import com.vibhu.littlelemon.ui.network.ConnectivityObserver
 import com.vibhu.littlelemon.ui.network.NetworkMonitor
@@ -100,6 +104,20 @@ fun Home(
         val menuItemCardHeight = height*.15f
         val menuItemVerticalPadding = height*.0067f
 
+        var searchValue by remember { mutableStateOf("") }
+        var currentSortingOptionIndex by remember { mutableStateOf<Int?>(null) }
+
+        var currentMenuList = menuList
+            .searchBy(searchValue)
+            .sortByCategory(
+                category =
+                    if (currentSortingOptionIndex!=null) {
+                        menuCategories[currentSortingOptionIndex!!]
+                    }
+                    else{
+                        null
+                    }
+            )
 
         Column(
             Modifier.fillMaxSize(),
@@ -124,12 +142,15 @@ fun Home(
                     ),
                 height = heroSectionHeight - (heroSectionTopPadding + heroSectionBottomPadding),
                 width = screenWidthAfterPadding,
-            )
+                searchValue = searchValue
+            ){
+                searchValue = it
+            }
             if (menuList.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier
-                        .size(max(height*.55f, screenWidthAfterPadding))
-                        .padding(horizontal = horizontalPadding, vertical = height*.025f)
+                        .size(max(height * .55f, screenWidthAfterPadding))
+                        .padding(horizontal = horizontalPadding, vertical = height * .025f)
                         .align(Alignment.CenterHorizontally),
                     color = LittleLemonColors.primary1,
                     trackColor = LittleLemonColors.secondary3
@@ -150,12 +171,16 @@ fun Home(
                         ),
                     height = sortingSectionHeight - (sortingSectionVerticalPadding * 2),
                     width = screenWidthAfterPadding,
-                    options = menuCategories
-                )
+                    options = menuCategories,
+                    currentSelectedIndex = currentSortingOptionIndex
+
+                ){ index ->
+                    currentSortingOptionIndex = index
+                }
                 LazyColumn(
                     contentPadding = PaddingValues(horizontal = horizontalPadding)
                 ) {
-                    itemsIndexed(menuList) { index, menuItem ->
+                    itemsIndexed(currentMenuList) { index, menuItem ->
                         var padding = PaddingValues(vertical = menuItemVerticalPadding)
                         if (index == 0) {
                             padding = PaddingValues(
@@ -211,7 +236,7 @@ private fun TopBar(
         Button(
             onClick = onClickProfile,
             modifier = Modifier
-                .padding(horizontal = width*.025f, vertical = height*.175f)
+                .padding(horizontal = width * .025f, vertical = height * .175f)
                 .align(Alignment.CenterEnd)
             ,
             shape = CircleShape,
@@ -235,6 +260,8 @@ private fun HeroSection(
     modifier: Modifier = Modifier,
     height: Dp,
     width: Dp,
+    searchValue: String,
+    onSearchBarValueChange: (String) -> Unit,
     ){
     Column(
         modifier = modifier
@@ -287,7 +314,8 @@ private fun HeroSection(
                     style = LittleLemonTypography.subTitle,
                     fontSize = (subtitleHeight).value.sp,
                     color = LittleLemonColors.secondary3,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .offset(y = 0.dp.minus(subtitleOffset))
                 )
                 Text(
@@ -305,8 +333,9 @@ private fun HeroSection(
 
             //Image
             Box(
-                modifier = Modifier.align(Alignment.CenterVertically)
-                    .height(middleRowHeight*.9f)
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .height(middleRowHeight * .9f)
                     .offset(y = 0.dp.minus(imageOffset))
             ){
                 Image(
@@ -325,36 +354,56 @@ private fun HeroSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(searchBarHeight)
-                .background(LittleLemonColors.secondary3 , RoundedCornerShape(8.dp))
-                .padding(searchBarHeight*.25f)
+                .background(LittleLemonColors.secondary3, RoundedCornerShape(8.dp))
+                .padding(searchBarHeight * .25f)
             ,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            var placeHolderShouldBeVisible by remember {
+                mutableStateOf(true)
+            }
             val itemSize = searchBarHeight*.5f
             Icon(
                 painterResource(R.drawable.round_search_24),
                 tint = LittleLemonColors.secondary4,
                 contentDescription = "Search",
-                modifier = Modifier.size(itemSize).offset(y = itemSize*.075f)
+                modifier = Modifier
+                    .size(itemSize)
+                    .offset(y = itemSize * .075f)
             )
             Spacer(modifier = Modifier.width(searchBarHeight*.25f))
             BasicTextField(
-                value = "",
+                value = searchValue,
                 onValueChange = {
-
-                },
+                    if (placeHolderShouldBeVisible){
+                        placeHolderShouldBeVisible = false
+                    }
+                    onSearchBarValueChange(it)
+                                },
                 singleLine = true,
-                textStyle = LittleLemonTypography.paragraphText.copy(color = LittleLemonColors.primary1),
+                textStyle = LittleLemonTypography.paragraphText.copy(
+                    color = LittleLemonColors.primary1,
+                    fontSize = (itemSize*.725f).value.sp,
+                ),
                 decorationBox = { innerTextField ->
-                    Text(
-                        "Enter search phrase",
-                        maxLines = 1,
-                        style = LittleLemonTypography.paragraphText,
-                        fontSize = (itemSize*.725f).value.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = LittleLemonColors.primary1.copy(alpha = .9f),
-                        modifier = Modifier.height(itemSize).fillMaxWidth()
-                    )
+                    if (placeHolderShouldBeVisible)
+                    {
+                        Text(
+                            "Enter search phrase",
+                            maxLines = 1,
+                            style = LittleLemonTypography.paragraphText,
+                            fontSize = (itemSize*.725f).value.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = LittleLemonColors.primary1.copy(alpha = .9f),
+                            modifier = Modifier
+                                .height(itemSize)
+                                .fillMaxWidth()
+                        )
+                        innerTextField()
+                    }
+                    else {
+                        innerTextField()
+                    }
                 }
             )
         }
@@ -371,7 +420,9 @@ private fun SortingSection(
         "Mains",
         "Desserts",
         "Drinks"
-    )
+    ),
+    currentSelectedIndex: Int?,
+    onSortingOptionClick: (Int?) -> Unit
 ){
     val titleHeight = height*.5f
     val listHeight = height*.5f
@@ -384,45 +435,40 @@ private fun SortingSection(
             fontSize = (titleHeight*.55f).value.sp,
             maxLines = 1,
             color = LittleLemonColors.secondary4,
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(.5f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(.5f)
 
         )
         LazyRow(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
             contentPadding = PaddingValues(0.dp)
         ) {
             itemsIndexed(options){index, item ->
                 val horizontalPadding = width*.025f
-                when(index){
-                    0 -> {
-                        SortingOption(
-                            height = listHeight,
-                            width = width,
-                            paddingValues = PaddingValues(end = horizontalPadding),
-                            title = item
-                        )
+                val isSelected = currentSelectedIndex == index
+                val padding =
+                    when (index) {
+                        0 -> PaddingValues(end = horizontalPadding)
+                        options.size-1 -> PaddingValues(start = horizontalPadding)
+                        else -> PaddingValues(horizontal = horizontalPadding)
                     }
-
-                    options.size-1 ->{
-                        SortingOption(
-                            height = listHeight,
-                            width = width,
-                            paddingValues = PaddingValues(start = horizontalPadding),
-                            title = item
-                        )
+                    SortingOption(
+                        height = listHeight,
+                        width = width,
+                        paddingValues = padding,
+                        title = item,
+                        isSelected = isSelected
+                    ){
+                        if (isSelected)
+                            onSortingOptionClick(null)
+                        else
+                            onSortingOptionClick(index)
                     }
-                    else -> {
-                        SortingOption(
-                            height = listHeight,
-                            width = width,
-                            paddingValues = PaddingValues(horizontal = horizontalPadding),
-                            title = item
-                        )
-                    }
-                }
             }
         }
-
     }
 }
 
@@ -432,20 +478,28 @@ private fun SortingOption(
     height: Dp,
     width: Dp,
     paddingValues: PaddingValues,
-    title: String
+    title: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
 ){
     Box(
         Modifier.padding(paddingValues)
     ) {
         Button(
             onClick = {
-
+                onClick()
             },
             contentPadding = PaddingValues(horizontal = width*.04f, vertical =height*.2f),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = LittleLemonColors.secondary3,
-                contentColor = LittleLemonColors.primary1
+                containerColor = if(isSelected)
+                        LittleLemonColors.primary1
+                    else
+                        LittleLemonColors.secondary3,
+                contentColor = if(isSelected)
+                    LittleLemonColors.secondary3
+                else
+                    LittleLemonColors.primary1
             )
         ) {
             Text(
@@ -476,6 +530,24 @@ fun Modifier.bottomBorder(strokeWidth: Dp, color: Color) = this.then(
         )
     }
 )
+
+private fun List<MenuItemRoom>.searchBy(searchPhrase: String): List<MenuItemRoom>{
+    return if (searchPhrase.isBlank()){
+        this
+    }
+    else{
+        this.filter { it.title.contains(searchPhrase, ignoreCase = true) }
+    }
+}
+
+private fun List<MenuItemRoom>.sortByCategory(category: String?): List<MenuItemRoom>{
+    return if(category==null || category.isBlank()){
+        this
+    }
+    else{
+        this.filter { it.category.lowercase() == category.lowercase() }
+    }
+}
 
 
 
